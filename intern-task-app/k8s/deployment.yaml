@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intern-task-app
+  labels:
+    app: intern-task-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: intern-task-app
+  template:
+    metadata:
+      labels:
+        app: intern-task-app
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: intern-task-app
+          image: intern-task-app:local
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 5000
+          env:
+            - name: PORT
+              value: "5000"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
